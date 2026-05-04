@@ -79,16 +79,20 @@ class JWTGuardTest extends AbstractTestCase
         $this->provider->shouldReceive('retrieveById')
             ->once()
             ->with(1)
-            ->andReturn((object) ['id' => 1]);
+            ->andReturn(new LaravelUserStub());
 
-        $this->assertSame(1, $this->guard->user()->id);
+        $this->eventDispatcher->shouldReceive('dispatch')
+            ->once()
+            ->with(\Mockery::type(Authenticated::class));
+
+        $this->assertSame(1, $this->guard->user()->getAuthIdentifier());
 
         // check that the user is stored on the object next time round
-        $this->assertSame(1, $this->guard->user()->id);
+        $this->assertSame(1, $this->guard->user()->getAuthIdentifier());
         $this->assertTrue($this->guard->check());
 
         // also make sure userOrFail does not fail
-        $this->assertSame(1, $this->guard->userOrFail()->id);
+        $this->assertSame(1, $this->guard->userOrFail()->getAuthIdentifier());
     }
 
     public function testItShouldGetTheAuthenticatedUserIfAValidTokenIsProvidedAndNotThrowAnException()
@@ -110,12 +114,16 @@ class JWTGuardTest extends AbstractTestCase
         $this->provider->shouldReceive('retrieveById')
             ->once()
             ->with(1)
-            ->andReturn((object) ['id' => 1]);
+            ->andReturn(new LaravelUserStub());
 
-        $this->assertSame(1, $this->guard->userOrFail()->id);
+        $this->eventDispatcher->shouldReceive('dispatch')
+            ->once()
+            ->with(\Mockery::type(Authenticated::class));
+
+        $this->assertSame(1, $this->guard->userOrFail()->getAuthIdentifier());
 
         // check that the user is stored on the object next time round
-        $this->assertSame(1, $this->guard->userOrFail()->id);
+        $this->assertSame(1, $this->guard->userOrFail()->getAuthIdentifier());
         $this->assertTrue($this->guard->check());
     }
 
